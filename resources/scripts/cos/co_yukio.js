@@ -175,7 +175,7 @@ var Constructor = function()
 
     this.powerTrueDamageBonus = 40;
     this.powerTrueDefenseBonus = 40;
-    this.powerMinTrueDamage = 10
+    this.powerMinTrueDamage = 10;
     this.powerOffBonus = 10;
     this.powerDefBonus = 10;
 
