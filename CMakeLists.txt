@@ -84,6 +84,9 @@ if(NOT DEFINED QT_VERSION)
     execute_process(COMMAND ${QMAKE_EXE} -query QT_VERSION OUTPUT_VARIABLE QT_VERSION)
 endif()
 message("Qt-Version: ${QT_VERSION}")
+if(Qt6Core_VERSION VERSION_LESS "6.5.0")
+    add_compile_definitions(Qt_6_5=Qt_6_4)
+endif()
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
@@ -109,8 +112,8 @@ if(PRECOMPILEDOPENSSL AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
 elseif(PRECOMPILEDOPENSSL AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     message("Using local pre-compiled openssl version from path: ${OPENSSL_LIB_PATH} for windows")
     set(OPENSSL_LIBS
-        ${OPENSSL_LIB_PATH}/libcrypto-3-x64.dll
-        ${OPENSSL_LIB_PATH}/libssl-3-x64.dll
+        ${OPENSSL_LIB_PATH}/libcrypto-4-x64.dll
+        ${OPENSSL_LIB_PATH}/libssl-4-x64.dll
     CACHE INTERNAL "")
     include_directories(${OPENSSL_INCLUDE_DIR})
     message ("OpenSsL Include directories:" ${OPENSSL_INCLUDE_DIR})
@@ -215,15 +218,15 @@ endif()
 add_definitions(
     -DVERSION_MAJOR=0
     -DVERSION_MINOR=38
-    -DVERSION_REVISION=6
+    -DVERSION_REVISION=7
     -DVERSION_SUFFIX="main"
     -DCOW_BUILD_TAG="${COW_BUILD_TAG}"
     -DCOW_BUILD_NAME="${COW_BUILD_NAME}"
     -DUPDATE_FILE="${UPDATE_FILE}"
 )
 
-set(COW_ANDROID_VERSION_NAME "0.38.6-main")
-set(COW_ANDROID_VERSION_CODE "67")
+set(COW_ANDROID_VERSION_NAME "0.38.7-main")
+set(COW_ANDROID_VERSION_CODE "68")
 
 ###################################################################################
 # Set up some compiler and linking options
@@ -537,6 +540,7 @@ set(${PROJECT_NAME}_SRCS
     objects/dialogs/filedialog.cpp objects/dialogs/filedialog.h
     objects/dialogs/dialogcostyle.cpp objects/dialogs/dialogcostyle.h
     objects/dialogs/dialogmessagebox.cpp objects/dialogs/dialogmessagebox.h
+    objects/dialogs/dialogmodsyncprogress.cpp objects/dialogs/dialogmodsyncprogress.h
     objects/dialogs/dialogtextinput.cpp objects/dialogs/dialogtextinput.h
     objects/dialogs/folderdialog.cpp objects/dialogs/folderdialog.h
     objects/dialogs/dialogvaluecounter.cpp objects/dialogs/dialogvaluecounter.h

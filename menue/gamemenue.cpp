@@ -705,13 +705,23 @@ void GameMenue::sendVerifyGameData(quint64 socketID)
         stream << mods[i];
         stream << versions[i];
     }
-    auto hostHash = Filesupport::getRuntimeHash(mods);
-    if (GameConsole::eDEBUG >= GameConsole::getLogLevel())
+    quint32 capabilities = 0;
+    if (Settings::getInstance()->getModSyncEnabled())
     {
-        QString hostString = GlobalUtils::getByteArrayString(hostHash);
-        CONSOLE_PRINT("Sending host hash: " + hostString, GameConsole::eDEBUG);
+        capabilities |= Filesupport::CapabilityModSync;
     }
-    Filesupport::writeByteArray(stream, hostHash);
+    // Stay on parent v1 wire format when no caps advertised so v1 clients still join.
+    if (capabilities == 0)
+    {
+        stream << static_cast<qint32>(Filesupport::LegacyHashPayloadVersion);
+    }
+    else
+    {
+        stream << static_cast<qint32>(Filesupport::CurrentHashPayloadVersion);
+        stream << capabilities;
+    }
+    Filesupport::writeMap(stream, Filesupport::getResourceFolderHashes());
+    Filesupport::writeMap(stream, Filesupport::getPerModHashes(mods));
     emit m_pNetworkInterface->sig_sendData(socketID, data, NetworkInterface::NetworkSerives::Multiplayer, false);
 }
 
@@ -1414,6 +1424,11 @@ bool GameMenue::doDespawnSlave()
             mods.insert(JsonKeys::JSONKEY_MOD + QString::number(i), activeMods[i]);
         }
         data.insert(JsonKeys::JSONKEY_USEDMODS, mods);
+        GameVersion gameVersion;
+        data.insert(JsonKeys::JSONKEY_VERSION_MAJOR, gameVersion.getMajor());
+        data.insert(JsonKeys::JSONKEY_VERSION_MINOR, gameVersion.getMinor());
+        data.insert(JsonKeys::JSONKEY_VERSION_REVISION, gameVersion.getRevision());
+        data.insert(JsonKeys::JSONKEY_VERSION_SUFIX, gameVersion.getSufix());
         QJsonArray usernames;
         qint32 count = m_pMap->getPlayerCount();
         for (qint32 i = 0; i < count; ++i)
